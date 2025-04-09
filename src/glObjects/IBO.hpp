@@ -15,6 +15,8 @@ class IBO {
         void bind();
         void unbind();
 
+        GLuint getID() { return ID; }
+
         bool isBound() const;
 };
 
@@ -43,10 +45,10 @@ bool IBO::isBound() const {
     GLint currentBuffer = 0;
     glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentBuffer);
     if (currentBuffer == static_cast<GLint>(ID)) {
-        std::cout << "GL_ELEMENT_ARRAY_BUFFER bound with IBO: " << ID << std::endl;
+        // std::cout << "GL_ELEMENT_ARRAY_BUFFER bound with IBO: " << ID << std::endl;
         return true;
     } else {
-        std::cout << "IBO (" << ID << ") is not bound" << std::endl;
+        // std::cout << "IBO (" << ID << ") is not bound" << std::endl;
         return false;
     }
 }

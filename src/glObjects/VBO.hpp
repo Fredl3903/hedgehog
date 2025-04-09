@@ -10,6 +10,8 @@ class VBO {
         void bind();
         void unbind();
 
+        GLuint getID() { return ID; }
+
         bool isBound() const;
 };
 
@@ -47,10 +49,10 @@ bool VBO::isBound() const {
     GLint currentBuffer = 0;
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentBuffer);
     if (currentBuffer == static_cast<GLint>(ID)) {
-        std::cout << "GL_ARRAY_BUFFER bound with VBO: " << ID << std::endl;
+        // std::cout << "GL_ARRAY_BUFFER bound with VBO: " << ID << std::endl;
         return true;
     } else {
-        std::cout << "VBO (" << ID << ") is not bound" << std::endl;
+        // std::cout << "VBO (" << ID << ") is not bound" << std::endl;
         return false;
     }
 }
