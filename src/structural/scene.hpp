@@ -8,10 +8,12 @@
 class hhScene {
   
   private:
+    
     int numLayers = 0;
-    std::vector<std::shared_ptr<hhLayer>> layers;
 
   public:
+    
+    std::vector<std::shared_ptr<hhLayer>> layers;
 
     hhScene() {};
     // move constructor

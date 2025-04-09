@@ -48,6 +48,9 @@ class hhModel {
 
     void setBuffers();
     void renderModel();
+
+
+    void debugOutput();
 };
 
 void hhModel::addMesh(const hhMesh& newMesh) {
@@ -198,4 +201,22 @@ void hhModel::scale(glm::vec3 center, glm::vec3 scaleFactors) {
 }
 void hhModel::scale(glm::vec2 center, glm::vec2 scaleFactors) {
     modelMatrix = glm::scale(modelMatrix, glm::vec3(scaleFactors.x, scaleFactors.y, 0.0));
+}
+
+
+
+
+void hhModel::debugOutput() {
+  std::cout << "*** hhModel debug ***" << std::endl;
+  std::cout << "gl objects: " << "\n"
+    << "VAO.ID: " << modelVAO.getID() << " | isBound: " << modelVAO.isBound() << "\n"
+    << "VBO.ID: " << modelVBO.getID() << " | isBound: " << modelVBO.isBound() << "\n"
+    << "IBO.ID: " << modelIBO.getID() << " | isBound: " << modelIBO.isBound() << std::endl;
+  std::cout << " vertices & indices (max 64): " << std::endl;
+  for (int i = 0; i < std::min(static_cast<int>(combinedIndices.size()), 64); i++) {
+    std::cout << combinedIndices[i] << ":  "
+      << "( " << combinedVertices[3 * combinedIndices[i]] << ", "
+      << combinedVertices[3 * combinedIndices[i] + 1] << ", "
+      << combinedVertices[3 * combinedIndices[i] + 2] << " )" << std::endl;
+  }
 }

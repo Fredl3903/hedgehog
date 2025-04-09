@@ -27,16 +27,17 @@ class hhWindow {
 
     int numScenes = 0;
     int currentScene;
-    std::vector<std::unique_ptr<hhScene>> scenes;
     
     std::shared_ptr<InputManager> inputManager;
         
   public:
-
+    
     int windowWidth = 800;
     int windowHeight = 600;
     std::unique_ptr<GLFWwindow, void(*)(GLFWwindow*)> windowPtr;
 
+    std::vector<std::unique_ptr<hhScene>> scenes;
+    
     hhWindow(int width, int height, const char* title);
 
     InputManager* getInputManagerPtr() { return inputManager.get(); }
@@ -44,6 +45,7 @@ class hhWindow {
     void addScene(hhScene&& newScene);
 
     void renderLoop(int scene);
+    void debugOutput();
 
     void updateInput() {
       inputManager->update(windowPtr.get());
@@ -120,8 +122,50 @@ void hhWindow::renderLoop(int scene) {
   // std::cout << "rendering now" << std::endl;
   // rendering stuff goes here
   int currentScene = 0;
+  debugOutput();
   scenes[currentScene]->renderScene();
 
   glfwSwapBuffers(windowPtr.get());
   glfwPollEvents();
+}
+
+
+
+
+
+
+void hhWindow::debugOutput() {
+  // currently checks 0th model from 0th layer of 0th scene
+  // adapt at some point to check all
+
+  std::shared_ptr<hhLayer> checkLayer = scenes[0]->layers[0];
+    std::shared_ptr<hhModel> checkModel;
+    if (!checkLayer) {
+      std::cout << "failed to find layers[0]" << std::endl;
+    }
+    std::shared_ptr<hhShaderProgram> checkShaders = (checkLayer->layerShaders).lock();
+    if (!checkShaders) {
+      std::cout << "shaders not found" << std::endl;
+    } else {
+      std::cout << "shaderProgramID: " << checkShaders->getID() << std::endl;
+    }
+    std::shared_ptr<hhCamera> checkCam = (checkLayer->layerCamera).lock();
+    if (!checkCam) {
+      std::cout << "camera not found" << std::endl;
+    } else {
+      glm::vec3 camPos = checkCam->camPos;
+      glm::vec3 camAt = checkCam->forward;
+      std::cout << "camera position: ( " << camPos.x << ", "
+        << camPos.y << ", "
+        << camPos.z << " )" << std::endl;
+      std::cout << "camera forward: ( " << camAt.x << ", "
+        << camAt.y << ", "
+        << camAt.z << " )" << std::endl;
+    }
+    checkModel = (checkLayer->models[0]).lock();
+    if (!checkModel) {
+      std::cout << "failed to find models[0]" << std::endl;
+    } else {
+      checkModel->debugOutput();
+    }
 }

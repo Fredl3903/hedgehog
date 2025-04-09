@@ -13,14 +13,15 @@ class hhLayer {
   private:
         
     int numModels = 0;
-    std::vector<std::weak_ptr<hhModel>> models;
-    std::weak_ptr<hhCamera> layerCamera;
-    std::weak_ptr<hhShaderProgram> layerShaders;
 
     // add in JSON member that describes the structure of layer uniforms
     // addLayerUniform() method 
 
   public:
+    
+    std::weak_ptr<hhCamera> layerCamera;
+    std::weak_ptr<hhShaderProgram> layerShaders;
+    std::vector<std::weak_ptr<hhModel>> models;
 
     unsigned int order = 0;
         
