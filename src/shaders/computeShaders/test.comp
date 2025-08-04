@@ -1,0 +1,15 @@
+#version 430 core
+
+layout(std430, binding = 0) buffer testVectorBuffer {
+  int testVec[];
+};
+
+layout(local_size_x = 64) in;
+
+void main() {
+
+  uint index = gl_GlobalInvocationID.x;
+  
+  testVec[index] = 2 * int(index);
+
+}

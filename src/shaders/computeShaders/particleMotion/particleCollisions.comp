@@ -1,0 +1,49 @@
+#version 430 core
+
+struct hhVert {
+  vec3 pos;
+  float _pad0;
+
+  vec3 norm;
+  float _pad1;
+
+  vec3 col;
+  float _pad2;
+
+  vec2 uv;
+
+  int update;
+  int posID;
+};
+
+layout(std430, binding = 0) buffer particlePositions {
+  hhVert particles[];
+};
+
+layout(std430, binding = 1) buffer velocities {
+  vec4 v[];
+};
+
+layout(local_size_x = 1) in;
+
+void main() {
+  uint selfID = gl_WorkGroupID.x 
+              + gl_WorkGroupID.y * gl_NumWorkGroups.x
+              + gl_WorkGroupID.z * gl_NumWorkGroups.x * gl_NumWorkGroups.y;
+
+  const float boxDampen = 0.8;
+  const float size = 6.0;
+
+  if (abs(particles[selfID].pos.x) > size && abs(v[selfID].x) > 0.01) {
+    particles[selfID].pos.x *= size / abs(particles[selfID].pos.x);
+    v[selfID].x *= -boxDampen;
+  }
+  if (abs(particles[selfID].pos.y) > size && abs(v[selfID].y) > 0.01) {
+    particles[selfID].pos.y *= size / abs(particles[selfID].pos.y);
+    v[selfID].y *= -boxDampen;
+  }
+  if (abs(particles[selfID].pos.z) > size && abs(v[selfID].z) > 0.01) {
+    particles[selfID].pos.z *= size / abs(particles[selfID].pos.z);
+    v[selfID].z *= -boxDampen;
+  }
+}

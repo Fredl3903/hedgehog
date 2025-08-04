@@ -1,0 +1,81 @@
+#version 430 core
+
+struct hhVert {
+  vec3 pos;
+  float _pad0;
+
+  vec3 norm;
+  float _pad1;
+
+  vec3 col;
+  float _pad2;
+
+  vec2 uv;
+
+  int update;
+  int posID;
+};
+
+layout(std430, binding = 0) buffer vertices {
+  hhVert verts[];
+};
+
+layout(std430, binding = 1) buffer velocities {
+  vec4 v[];
+};
+
+layout(local_size_x = 12) in;
+
+shared vec4 partialV[12];
+
+void main() {
+
+  uint selfID = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x + gl_WorkGroupID.z * gl_NumWorkGroups.y * gl_NumWorkGroups.x;
+  uint sliceIndex = gl_LocalInvocationID.x;
+
+  const uint numParticles = gl_NumWorkGroups.x * gl_NumWorkGroups.y * gl_NumWorkGroups.z;
+  const uint groupParticles = gl_NumWorkGroups.y * gl_NumWorkGroups.z;
+  const uint startI = sliceIndex * groupParticles;
+  const uint endI = startI + groupParticles;
+
+  // almost homogeneous fill (vDampen = 0.9999)
+  const float m = 0.01;
+  const float A = 0.01;
+  const float B = 0.08;
+  const float softening = 0.01;
+  const float dt = 0.002;
+
+  // tight ball (vDampen = 0.99)
+  // const float m = 0.0001;
+  // const float A = 0.04;
+  // const float B = 0.02;
+  // const float softening = 0.02;
+  // const float dt = 0.001;
+
+  partialV[sliceIndex] = vec4(0.0);
+
+  for (int i = int(startI); i < int(endI); i++) {
+
+    if (i == selfID) continue; // avoid self interaction
+
+    vec3 r = verts[i].pos - verts[selfID].pos;
+    
+    float d2 = dot(r, r) + softening; // add softening term to avoid singularities
+    float d = sqrt(d2);
+    vec3 r_hat = r / d;
+
+    float forceMag = (A / d) - (B / d2);
+    vec3 force = forceMag * r_hat;
+
+    partialV[sliceIndex] += vec4(force * dt / m, 0);
+  }
+  
+  barrier();
+  
+  if (sliceIndex == 0) {
+    for (int i = 0; i < 12; i++) {
+      v[selfID] += partialV[i] * 0.5;
+    }
+  }
+  v[selfID] += vec4(0.0, -9.81 * dt * 3.0, 0.0, 0.0); // vague dodgy gravity
+}
